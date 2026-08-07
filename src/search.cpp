@@ -52,6 +52,10 @@
 
 namespace Stockfish {
 
+    int nmpRbase = 6800, nmpRdepth = 341, nmpReval = 4096;
+
+    TUNE(nmpRbase, nmpRdepth, nmpReval);
+
 static constexpr std::array<int, 16> lmrDivisor = {3637, 2787, 2761, 2939, 3171, 3347, 3147, 2762,
                                                    2772, 3106, 3107, 3060, 3112, 2991, 3090, 3542};
 
@@ -999,7 +1003,7 @@ Value Search::Worker::search(
         assert((ss - 1)->currentMove != Move::null());
 
         // Null move dynamic reduction based on depth
-        Depth R = 7 + depth / 3 + std::max((ss->staticEval - beta) / 256, 0);
+        Depth R = (nmpRbase + depth * nmpRdepth + std::max(((ss->staticEval - beta) * nmpReval) / 1024, 0)) / 1024;
         do_null_move(pos, st, ss);
 
         Value nullValue = -search<NonPV>(pos, ss + 1, -beta, -beta + 1, depth - R, false);
